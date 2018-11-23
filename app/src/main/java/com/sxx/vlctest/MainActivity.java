@@ -15,7 +15,7 @@ import org.videolan.libvlc.MediaPlayer;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String mUrl = "smb://smb:123@DPC/videos/30364.mpg";
+    private String mUrl = "/sdcard/test.mp4";
 
     private MediaPlayer mMediaPlayer;
     private SurfaceView mSurfaceView;
@@ -42,11 +42,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void play(String path) {
         try {
-            Media media = new Media(VLCInstance.get(), Uri.parse(path));
+            Media media = new Media(VLCInstance.get(), path);
             mMediaPlayer.setMedia(media);
             mMediaPlayer.play();
-        }catch (Exception e) {
-
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
