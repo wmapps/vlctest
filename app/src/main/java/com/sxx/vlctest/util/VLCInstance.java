@@ -21,9 +21,8 @@
 package com.sxx.vlctest.util;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
-
-import com.sxx.vlctest.VLCApplication;
 
 import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.util.VLCUtil;
@@ -34,10 +33,9 @@ public class VLCInstance {
     private static LibVLC sLibVLC = null;
 
     /** A set of utility functions for the VLC application */
-    public synchronized static LibVLC get() throws IllegalStateException {
+    public synchronized static LibVLC get(@NonNull Context context) throws IllegalStateException {
         if (sLibVLC == null) {
-            final Context context = VLCApplication.getAppContext();
-            if(!VLCUtil.hasCompatibleCPU(context)) {
+            if (!VLCUtil.hasCompatibleCPU(context)) {
                 Log.e(TAG, VLCUtil.getErrorMsg());
                 throw new IllegalStateException("LibVLC initialisation failed: " + VLCUtil.getErrorMsg());
             }
@@ -47,7 +45,7 @@ public class VLCInstance {
         return sLibVLC;
     }
 
-    public static synchronized void restart(Context context) throws IllegalStateException {
+    public static synchronized void restart(@NonNull Context context) throws IllegalStateException {
         if (sLibVLC != null) {
             sLibVLC.release();
             sLibVLC = new LibVLC(VLCOptions.getLibOptions(context));

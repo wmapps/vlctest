@@ -3,6 +3,7 @@ package com.sxx.vlctest;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.SurfaceView;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,8 +28,54 @@ public class MainActivity extends AppCompatActivity {
 
         mSurfaceView = (SurfaceView) findViewById(R.id.player);
 
-        mMediaPlayer = new MediaPlayer(VLCInstance.get());
+        mMediaPlayer = new MediaPlayer(VLCInstance.get(this));
         final IVLCVout vlcVout = mMediaPlayer.getVLCVout();
+        mMediaPlayer.setEventListener(new MediaPlayer.EventListener() {
+            @Override
+            public void onEvent(MediaPlayer.Event event) {
+                switch (event.type) {
+                    case MediaPlayer.Event.Opening:
+                        Log.d("onEvent", "Opening");
+                        break;
+                    case MediaPlayer.Event.Playing:
+                        Log.d("onEvent", "Playing");
+                        break;
+                    case MediaPlayer.Event.Paused:
+                        Log.d("onEvent", "Paused");
+                        break;
+                    case MediaPlayer.Event.Stopped:
+                        Log.d("onEvent", "Stopped");
+                        break;
+                    case MediaPlayer.Event.EndReached:
+                        Log.d("onEvent", "EndReached");
+                        break;
+                    case MediaPlayer.Event.EncounteredError:
+                        Log.d("onEvent", "EncounteredError");
+                        break;
+                    case MediaPlayer.Event.TimeChanged:
+                        Log.d("onEvent", "TimeChanged");
+                        break;
+                    case MediaPlayer.Event.PositionChanged:
+                        Log.d("onEvent", "PositionChanged");
+                        break;
+                    case MediaPlayer.Event.SeekableChanged:
+                        Log.d("onEvent", "SeekableChanged");
+                        break;
+                    case MediaPlayer.Event.PausableChanged:
+                        Log.d("onEvent", "PausableChanged");
+                        break;
+                    case MediaPlayer.Event.Vout:
+                        Log.d("onEvent", "Vout");
+                        break;
+                    case MediaPlayer.Event.ESAdded:
+                        Log.d("onEvent", "ESAdded");
+                        break;
+                    case MediaPlayer.Event.ESDeleted:
+                        Log.d("onEvent", "ESDeleted");
+                        break;
+                }
+            }
+        });
 
         vlcVout.detachViews();
         vlcVout.setVideoView(mSurfaceView);
@@ -42,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void play(String path) {
         try {
-            Media media = new Media(VLCInstance.get(), path);
+            Media media = new Media(VLCInstance.get(this), path);
             mMediaPlayer.setMedia(media);
             mMediaPlayer.play();
         } catch (Exception e) {

@@ -28,14 +28,13 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.text.TextUtils.TruncateAt;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
-
-import com.sxx.vlctest.VLCApplication;
 
 import org.videolan.libvlc.util.AndroidUtil;
 
@@ -60,32 +59,29 @@ public class Util {
         Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show();
     }
 
-    public static int convertPxToDp(int px) {
-        DisplayMetrics metrics = VLCApplication.getAppResources().getDisplayMetrics();
+    public static int convertPxToDp(@NonNull Context context, int px) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         float logicalDensity = metrics.density;
         int dp = Math.round(px / logicalDensity);
         return dp;
     }
 
-    public static int convertDpToPx(int dp) {
-        return Math.round(
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
-                        VLCApplication.getAppResources().getDisplayMetrics())
-                );
+    public static int convertDpToPx(@NonNull Context context, int dp) {
+        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics()));
     }
 
-    public static String readAsset(String assetName, String defaultS) {
+    public static String readAsset(@NonNull Context context, String assetName, String defaultS) {
         InputStream is = null;
         BufferedReader r = null;
         try {
-            is = VLCApplication.getAppResources().getAssets().open(assetName);
+            is = context.getResources().getAssets().open(assetName);
             r = new BufferedReader(new InputStreamReader(is, "UTF8"));
             StringBuilder sb = new StringBuilder();
             String line = r.readLine();
-            if(line != null) {
+            if (line != null) {
                 sb.append(line);
                 line = r.readLine();
-                while(line != null) {
+                while (line != null) {
                     sb.append('\n');
                     sb.append(line);
                     line = r.readLine();
@@ -102,12 +98,15 @@ public class Util {
 
     /**
      * Get a resource id from an attribute id.
-     * @param context
-     * @param attrId
+     *
+     * @param context the context
+     * @param context the context
+     * @param attrId  the attr id
+     *
      * @return the resource id
      */
-    public static int getResourceFromAttribute(Context context, int attrId) {
-        TypedArray a = context.getTheme().obtainStyledAttributes(new int[] {attrId});
+    public static int getResourceFromAttribute(@NonNull Context context, int attrId) {
+        TypedArray a = context.getTheme().obtainStyledAttributes(new int[]{attrId});
         int resId = a.getResourceId(0, 0);
         a.recycle();
         return resId;
@@ -115,28 +114,32 @@ public class Util {
 
     /**
      * Get a color id from an attribute id.
-     * @param context
-     * @param attrId
+     *
+     * @param context the context
+     * @param context the context
+     * @param attrId  the attr id
+     *
      * @return the color id
      */
-    public static int getColorFromAttribute(Context context, int attrId) {
-        return VLCApplication.getAppResources().getColor(getResourceFromAttribute(context, attrId));
+    public static int getColorFromAttribute(@NonNull Context context, int attrId) {
+        return context.getResources().getColor(getResourceFromAttribute(context, attrId));
     }
+
     /**
      * Set the alignment mode of the specified TextView with the desired align
      * mode from preferences.
-     *
+     * <p>
      * See @array/audio_title_alignment_values
      *
      * @param alignMode Align mode as read from preferences
-     * @param t Reference to the textview
+     * @param t         Reference to the textview
      */
     public static void setAlignModeByPref(int alignMode, TextView t) {
-        if(alignMode == 1)
+        if (alignMode == 1) {
             t.setEllipsize(TruncateAt.END);
-        else if(alignMode == 2)
+        } else if (alignMode == 2) {
             t.setEllipsize(TruncateAt.START);
-        else if(alignMode == 3) {
+        } else if (alignMode == 3) {
             t.setEllipsize(TruncateAt.MARQUEE);
             t.setMarqueeRepeatLimit(-1);
             t.setSelected(true);
@@ -144,38 +147,43 @@ public class Util {
     }
 
     public static int generateViewId() {
-        for (;;) {
+        for (; ; ) {
             final int result = sNextGeneratedId.get();
             // aapt-generated IDs have the high byte nonzero; clamp to the range under that.
             int newValue = result + 1;
-            if (newValue > 0x00FFFFFF) newValue = 1; // Roll over to 1, not 0.
+            if (newValue > 0x00FFFFFF) {
+                newValue = 1; // Roll over to 1, not 0.
+            }
             if (sNextGeneratedId.compareAndSet(result, newValue)) {
                 return result;
             }
         }
     }
 
-    public static String getPathFromURI(Uri contentUri) {
+    public static String getPathFromURI(@NonNull Context context, Uri contentUri) {
         Cursor cursor = null;
         try {
-            String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = VLCApplication.getAppContext().getContentResolver().query(contentUri,  proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
+            String[] proj = {MediaStore.Images.Media.DATA};
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+            if (cursor != null) {
+                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                cursor.moveToFirst();
+                return cursor.getString(column_index);
+            }
         } finally {
             close(cursor);
         }
+        return null;
     }
 
 
-
     @TargetApi(Build.VERSION_CODES.GINGERBREAD)
-    public static void commitPreferences(SharedPreferences.Editor editor){
-        if (AndroidUtil.isGingerbreadOrLater())
+    public static void commitPreferences(SharedPreferences.Editor editor) {
+        if (AndroidUtil.isGingerbreadOrLater()) {
             editor.apply();
-        else
+        } else {
             editor.commit();
+        }
     }
 
     public static boolean close(Closeable closeable) {
